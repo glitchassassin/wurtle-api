@@ -20,8 +20,8 @@ fn compare_words<'a,'b>(actual: &'a str, guess: &'a str) -> Result<Vec<&'b str>,
     if actual.len() != guess.len() {
         return Err(format!("Guess should have {} letters (was {})", actual.len(), guess));
     }
-    let mut word_chars: Vec<char> = actual.chars().collect();
-    let guess_chars: Vec<char> = guess.chars().collect();
+    let mut word_chars: Vec<char> = actual.to_lowercase().chars().collect();
+    let guess_chars: Vec<char> = guess.to_lowercase().chars().collect();
     let mut result = vec![];
 
     'letters: for index in 0..word_chars.len() {
@@ -57,6 +57,14 @@ mod tests {
     #[test]
     fn test_win() -> Result<(), String> {
         let response = compare_words("which", "which")?;
+        
+        assert_eq!(response, vec!["CORRECT", "CORRECT", "CORRECT", "CORRECT", "CORRECT",]);
+        Ok(())
+    }
+
+    #[test]
+    fn test_case() -> Result<(), String> {
+        let response = compare_words("Which", "WHICH")?;
         
         assert_eq!(response, vec!["CORRECT", "CORRECT", "CORRECT", "CORRECT", "CORRECT",]);
         Ok(())
