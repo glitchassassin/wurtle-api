@@ -1,21 +1,23 @@
-use crate::words::get_word;
+use crate::words::{get_word, is_valid_word};
 
 const LETTER_STATUS_CORRECT: &str = "CORRECT";
 const LETTER_STATUS_ALMOST: &str = "ALMOST";
 const LETTER_STATUS_WRONG: &str = "WRONG";
 
-pub fn check_guess<'a,'b>(guess: &'a str, word_index: &'a u32) -> Result<(Vec<&'b str>, bool), String> {
+pub fn check_guess<'a,'b>(guess: &'a str, word_index: usize) -> Result<(Vec<&'b str>, bool), String> {
+    if !is_valid_word(guess) {
+        return Err("Guess is not a valid word".to_string());
+    }
     match get_word(word_index) {
-        Ok(word) => {
-            let comparison = compare_words(&word, guess)?;
+        Some(word) => {
+            let comparison = compare_words(word, guess)?;
             let win = comparison.iter().all(|r| r == &LETTER_STATUS_CORRECT.to_string()); 
 
             Ok((comparison, win))
         },
-        Err(why) => Err(why)
+        None => Err("Word not found".to_string())
     }
 }
-
 fn compare_words<'a,'b>(actual: &'a str, guess: &'a str) -> Result<Vec<&'b str>, String> {
     if actual.len() != guess.len() {
         return Err(format!("Guess should have {} letters (was {})", actual.len(), guess));
@@ -88,6 +90,20 @@ mod tests {
     fn test_almost_characters() -> Result<(), String> {
         let response = compare_words("which", "whhhe")?;
         assert_eq!(response, vec!["CORRECT", "CORRECT", "ALMOST", "WRONG", "WRONG",]);
+        Ok(())
+    }
+
+    #[test]
+    fn test_invalid_word() -> Result<(), String> {
+        let response = check_guess("whhhe", 0);
+        assert_eq!(response, Err("Guess is not a valid word".to_string()));
+        Ok(())
+    }
+
+    #[test]
+    fn test_invalid_index() -> Result<(), String> {
+        let response = check_guess("whale", 10000000);
+        assert_eq!(response, Err("Word not found".to_string()));
         Ok(())
     }
 }
