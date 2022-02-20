@@ -1,30 +1,42 @@
-mod guess;
 mod words;
+mod guess;
 
-use actix_files::{NamedFile};
-use actix_web::{get, post, App, HttpServer, HttpResponse, Result, Responder};
+#[macro_use] extern crate rocket;
 
-#[get("/")]
-async fn index() -> Result<NamedFile> {
-    Ok(NamedFile::open("static/index.html")?)
+use rocket::fs::{FileServer, relative};
+use rocket::response::{status};
+use rocket::serde::json::Json;
+use rocket::serde::{Serialize, Deserialize};
+
+#[derive(Deserialize)]
+#[serde(crate = "rocket::serde")]
+struct GuessRequest<'r> {
+    guess: &'r str,
+    word: Option<u32>,
 }
 
-#[post("/guess")]
-async fn handle_guess(guess_body: String) -> impl Responder {
-    match guess::handler(guess_body) {
-        Err(why) => HttpResponse::BadRequest().body(why),
-        Ok(response) => HttpResponse::Ok().body(response)
-    }
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+struct GuessResponse<'a> {
+    result: Vec<&'a str>,
+    word: u32,
+    win: bool,
 }
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
-        App::new()
-            .service(index)
-            .service(handle_guess)
-    })
-    .bind("127.0.0.1:8080")?
-    .run()
-    .await
+#[post("/guess", format = "json", data = "<message>")]
+async fn handle_guess(message: Json<GuessRequest<'_>>) -> Result<Json<GuessResponse<'_>>, status::BadRequest<String>> {
+    let word = message.word.unwrap_or(words::get_random_word().map_err(|err| status::BadRequest(Some(err)))?);
+    let (result, win) = guess::check_guess(message.guess, &word).map_err(|err| status::BadRequest(Some(err)))?;
+    Ok(Json(GuessResponse {
+        result,
+        word,
+        win
+    }))
+}
+
+#[launch]
+async fn rocket() -> _ {
+    rocket::build()
+        .mount("/", FileServer::from(relative!("static/")))
+        .mount("/", routes![handle_guess])
 }

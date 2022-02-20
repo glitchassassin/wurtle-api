@@ -3,11 +3,11 @@ use std::io::{self, BufRead};
 use std::path::Path;
 use rand::{thread_rng, Rng};
 
-pub fn get_word(index: u32) -> Result<String, String> {
+pub fn get_word<'a>(index: &'a u32) -> Result<String, String> {
     let mut counter = 0;
     if let Ok(lines) = read_lines("./words.txt") {
         for line in lines {
-            if index == counter {
+            if index == &counter {
                 if let Ok(i) = line {
                     return Ok(i);
                 } else {
