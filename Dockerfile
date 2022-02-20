@@ -19,6 +19,8 @@ RUN rustup target add x86_64-unknown-linux-musl
 RUN cargo install --target x86_64-unknown-linux-musl --path .
 
 FROM scratch
+WORKDIR /app
 COPY --from=builder /usr/local/cargo/bin/wurtle-api ./app
+COPY --from=builder /app/resources /app/resources
 EXPOSE 8000
 ENTRYPOINT ["./app"]

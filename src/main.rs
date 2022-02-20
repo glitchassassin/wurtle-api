@@ -37,6 +37,6 @@ async fn handle_guess(message: Json<GuessRequest<'_>>) -> Result<Json<GuessRespo
 #[launch]
 async fn rocket() -> _ {
     rocket::build()
-        .mount("/", FileServer::from(relative!("static/")))
+        .mount("/", FileServer::from(relative!("resources/static/")))
         .mount("/", routes![handle_guess])
 }
