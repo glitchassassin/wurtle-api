@@ -10,7 +10,7 @@ pub fn is_valid_word(word: &str) -> bool {
     LINES.lines().any(|dict_word| dict_word == word)
 }
 
-pub fn get_random_word() -> Result<usize, String> {
+pub fn get_random_word() -> usize {
     let mut rng = thread_rng();
-    Ok(rng.gen_range(0..LINES.lines().count()))
+    rng.gen_range(0..LINES.lines().count())
 }

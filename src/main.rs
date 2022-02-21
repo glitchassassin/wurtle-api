@@ -25,7 +25,7 @@ struct GuessResponse<'a> {
 
 #[post("/guess", format = "json", data = "<message>")]
 async fn handle_guess(message: Json<GuessRequest<'_>>) -> Result<Json<GuessResponse<'_>>, status::BadRequest<String>> {
-    let word = message.word.unwrap_or(words::get_random_word().map_err(|err| status::BadRequest(Some(err)))?);
+    let word = message.word.unwrap_or_else(words::get_random_word);
     let (result, win) = guess::check_guess(message.guess, word).map_err(|err| status::BadRequest(Some(err)))?;
     Ok(Json(GuessResponse {
         result,

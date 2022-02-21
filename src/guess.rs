@@ -1,9 +1,5 @@
 use crate::words::{get_word, is_valid_word};
 
-const LETTER_STATUS_CORRECT: &str = "CORRECT";
-const LETTER_STATUS_ALMOST: &str = "ALMOST";
-const LETTER_STATUS_WRONG: &str = "WRONG";
-
 pub fn check_guess<'a,'b>(guess: &'a str, word_index: usize) -> Result<(Vec<&'b str>, bool), String> {
     if !is_valid_word(guess) {
         return Err("Guess is not a valid word".to_string());
@@ -11,7 +7,7 @@ pub fn check_guess<'a,'b>(guess: &'a str, word_index: usize) -> Result<(Vec<&'b 
     match get_word(word_index) {
         Some(word) => {
             let comparison = compare_words(word, guess)?;
-            let win = comparison.iter().all(|r| r == &LETTER_STATUS_CORRECT.to_string()); 
+            let win = comparison.iter().all(|r| *r == "CORRECT");
 
             Ok((comparison, win))
         },
@@ -31,7 +27,7 @@ fn compare_words<'a,'b>(actual: &'a str, guess: &'a str) -> Result<Vec<&'b str>,
         let actual = word_chars[index];
 
         if guessed == actual {
-            result.push(LETTER_STATUS_CORRECT);
+            result.push("CORRECT");
             word_chars[index] = '_';
         } else {
             // Check if guessed letter has a match in another position
@@ -40,12 +36,12 @@ fn compare_words<'a,'b>(actual: &'a str, guess: &'a str) -> Result<Vec<&'b str>,
             // already been matched to another guessed letter
             for actual_char_index in 0..word_chars.len() {
                 if word_chars[actual_char_index] != guess_chars[actual_char_index] && word_chars[actual_char_index] == guessed {
-                    result.push(LETTER_STATUS_ALMOST);
+                    result.push("ALMOST");
                     word_chars[actual_char_index] = '_';
                     continue 'letters;
                 }
             }
-            result.push(LETTER_STATUS_WRONG);
+            result.push("WRONG");
         }
     }
 
