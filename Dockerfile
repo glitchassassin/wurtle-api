@@ -1,8 +1,3 @@
-FROM swaggerapi/swagger-codegen-cli as apidocs
-WORKDIR /app
-COPY swagger.yml .
-RUN java -jar /opt/swagger-codegen-cli/swagger-codegen-cli.jar generate -i swagger.yml -l html
-
 FROM rust as planner
 WORKDIR /app
 RUN cargo install cargo-chef
@@ -26,6 +21,6 @@ RUN cargo install --target x86_64-unknown-linux-musl --path .
 FROM scratch
 WORKDIR /app
 COPY --from=builder /usr/local/cargo/bin/wurtle-api ./app
-COPY --from=apidocs /app/index.html /app/static/index.html
+COPY --from=builder /app/static /app/static
 EXPOSE 8000
 ENTRYPOINT ["./app"]
