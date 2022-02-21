@@ -26,6 +26,6 @@ RUN cargo install --target x86_64-unknown-linux-musl --path .
 FROM scratch
 WORKDIR /app
 COPY --from=builder /usr/local/cargo/bin/wurtle-api ./app
-COPY --from=apidocs /app/index.html /app/static
+COPY --from=apidocs /app/index.html /app/static/index.html
 EXPOSE 8000
 ENTRYPOINT ["./app"]
