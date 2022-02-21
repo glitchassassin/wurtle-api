@@ -1,0 +1,62 @@
+swagger: "2.0"
+info:
+  description: "An API for a word puzzle. Submit a guess, get feedback, until you get the answer correct!"
+  version: "1.0.0"
+  title: "Wurtle API"
+  license:
+    name: "Common Grace License 1.0"
+    url: "https://github.com/glitchassassin/wurtle-api/blob/main/LICENSE"
+basePath: "/"
+schemes:
+- "http"
+paths:
+  /guess:
+    post:
+      summary: "Guess a word"
+      description: ""
+      operationId: "guess"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Pet object that needs to be added to the store"
+        required: true
+        schema:
+          $ref: "#/definitions/Guess"
+      responses:
+        "400":
+          description: "Invalid input"
+        "200":
+          description: "Valid request"
+          schema: 
+            $ref: "#/definitions/Response"
+definitions:
+  Guess:
+    type: "object"
+    required: ["guess"]
+    properties:
+      guess:
+        type: "string"
+      word:
+        type: "integer"
+        format: "int64"
+        description: "Optional - will select a random word if not provided"
+  Response:
+    type: "object"
+    properties:
+      result:
+        type: "array"
+        items: 
+          type: "string"
+          enum: ["CORRECT", "ALMOST", "WRONG"]
+      word:
+        type: "integer"
+        format: "int64"
+      win:
+        type: "boolean"
+externalDocs:
+  description: "Find out more about the Wurtle API"
+  url: "https://github.com/glitchassassin/wurtle-api/"
