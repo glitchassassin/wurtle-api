@@ -3,6 +3,7 @@ mod guess;
 
 #[macro_use] extern crate rocket;
 
+use chrono::Local;
 use rocket::fs::{FileServer, relative};
 use rocket::response::{status};
 use rocket::serde::json::Json;
@@ -34,9 +35,22 @@ async fn handle_guess(message: Json<GuessRequest<'_>>) -> Result<Json<GuessRespo
     }))
 }
 
+#[post("/guess/today", format = "json", data = "<message>")]
+async fn handle_todays_guess(message: Json<GuessRequest<'_>>) -> Result<Json<GuessResponse<'_>>, status::BadRequest<String>> {
+    if let Some(word_index) = words::get_word_index_for_date(Local::now()) {
+        let (result, win) = guess::check_guess(message.guess, word_index).map_err(|err| status::BadRequest(Some(err)))?;
+        return Ok(Json(GuessResponse {
+            result,
+            word: word_index,
+            win
+        }))
+    }
+    Err(status::BadRequest(Some("Failed to get today's word".to_string())))
+}
+
 #[launch]
 async fn rocket() -> _ {
     rocket::build()
         .mount("/", FileServer::from(relative!("static/")))
-        .mount("/", routes![handle_guess])
+        .mount("/", routes![handle_guess, handle_todays_guess])
 }
