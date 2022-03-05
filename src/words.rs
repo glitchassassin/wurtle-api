@@ -18,7 +18,7 @@ pub fn get_random_word() -> usize {
 }
 
 pub fn get_word_index_for_date(date: DateTime<Local>) -> Option<usize> {
-    let origin = Local.ymd(2021, 6, 18).and_hms(0, 0, 0);
+    let origin = Local.ymd(2021, 6, 19).and_hms(0, 0, 0);
     let offset = date.signed_duration_since(origin);
     let offset_days = offset.num_days();
 
